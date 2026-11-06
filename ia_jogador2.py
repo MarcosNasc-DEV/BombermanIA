@@ -9,7 +9,7 @@ VERSÃO UNIFICADA DO GRUPO. Em cada trecho, o comentário ">>> [NOME]" mostra de
   [CARLOS]       modo "pressão": solta bomba / persegue o inimigo quando ele tem pouca chance de fugir
   [RYAN]         não ficar indo e voltando (histórico de posições) e pausa entre uma bomba e outra
   [MAICON]       ideia de soltar bomba ao lado de bloco quebrável (aqui só com fuga garantida)
-  [JOÃO PEDRO]  camada tática: modos grupo/caça/duelo, evita emboscada, posto de espera seguro,
+  [JOSÉ PEDRO]  camada tática: modos grupo/caça/duelo, evita emboscada, posto de espera seguro,
                  armadilha garantida, não destrói power-up alcançável, +10 entradas na rede
   [NOVO]         relatório final das decisões + arquivos TchkBum (.npz sempre, .pth se tiver torch)
 
@@ -41,7 +41,7 @@ NOME = "TchkBum"   # >>> [NOVO] nome da equipe: aparece nos prints e nos nomes d
 # ==============================================================================
 # CONFIGURAÇÃO (chaves liga/desliga)
 # ==============================================================================
-# >>> [JOÃO PEDRO] TATICA, MODO_FORCADO e o aviso sobre TREINAR são dele.
+# >>> [JOSÉ PEDRO] TATICA, MODO_FORCADO e o aviso sobre TREINAR são dele.
 TATICA = True            # False = comportamento antigo, sem a camada tática (só para comparar)
 MODO_FORCADO = None      # None = automático. "duelo" / "grupo" / "caca" forçam o modo
 USAR_REDE = True         # False = joga só com as regras
@@ -58,8 +58,8 @@ PRESSAO = True
 FUGA_MIN = 3
 DEST_MAX = 3
 CACA_PRESSAO = 6
-# >>> [NOVO] Junção Carlos + João: a pressão só liga nos modos agressivos da camada tática.
-# No modo "grupo" (3-4 vivos) vale a filosofia do João: só ataca com armadilha garantida.
+# >>> [NOVO] Junção Carlos + José Pedro: a pressão só liga nos modos agressivos da camada tática.
+# No modo "grupo" (3-4 vivos) vale a filosofia do José Pedro: só ataca com armadilha garantida.
 PRESSAO_MODOS = ("duelo", "caca")
 
 # >>> [RYAN] Configurações anti-vaivém e pausa entre bombas
@@ -282,7 +282,7 @@ def _bomba_util(mapa, cel, nivel, inimigos):
 
 
 # ------------------------------------------------------------------------------
-# >>> [JOÃO PEDRO] CAMADA TÁTICA
+# >>> [JOSÉ PEDRO] CAMADA TÁTICA
 # O que faz (resumo): olha o que cada inimigo pode fazer, escolhe o "modo" de jogo
 # (grupo / caça / duelo), evita casas onde um inimigo poderia me encurralar, não
 # destrói power-up que ainda dá para pegar, espera em "postos" seguros e só ataca
@@ -304,13 +304,13 @@ def _bombas_de(p):
 
 
 def _ameaca(p):
-    """>>> [JOÃO PEDRO] Quanto um inimigo é perigoso: mais bombas e mais alcance = mais perigoso."""
+    """>>> [JOSÉ PEDRO] Quanto um inimigo é perigoso: mais bombas e mais alcance = mais perigoso."""
     return _maxb_de(p) + 1.5 * _nivel_de(p)
 
 
 def _modo(mapa, players, tempo_restante):
     """
-    >>> [JOÃO PEDRO]
+    >>> [JOSÉ PEDRO]
     O que faz: escolhe o jeito de jogar conforme a situação.
       "duelo" = só 2 vivos (mais agressivo); "caça" = sem blocos ou pouco tempo (monta armadilhas);
       "grupo" = 3 ou 4 vivos (coleta power-ups e sobrevive).
@@ -328,7 +328,7 @@ def _modo(mapa, players, tempo_restante):
 
 def _risco_emboscada(mapa, cel, inimigos_p, bombas, bloqueados, t_bomba, t_fogo):
     """
-    >>> [JOÃO PEDRO]
+    >>> [JOSÉ PEDRO]
     O que faz: True se algum inimigo puder soltar uma bomba (onde está, ou depois de dar 1 passo)
     que me deixe SEM rota de fuga se eu estiver em 'cel'. É o contrário da armadilha: aqui o
     encurralado seria eu.
@@ -356,7 +356,7 @@ def _risco_emboscada(mapa, cel, inimigos_p, bombas, bloqueados, t_bomba, t_fogo)
 
 
 class _BombaVirtual:
-    """>>> [JOÃO PEDRO] Bomba imaginária (só para simular); nunca é entregue ao jogo."""
+    """>>> [JOSÉ PEDRO] Bomba imaginária (só para simular); nunca é entregue ao jogo."""
     def __init__(self, x, y, nivel, t):
         self.x, self.y, self.nivel, self.tempo_explosao = x, y, nivel, t
         self.explodida, self.tempo_fogo, self.fogo, self.dono = False, 0.0, [], None
@@ -364,7 +364,7 @@ class _BombaVirtual:
 
 def _escape_tatico(mapa, cel, nivel, bombas, bloqueados, t_bomba, t_fogo, inimigos_p):
     """
-    >>> [JOÃO PEDRO]
+    >>> [JOSÉ PEDRO]
     O que faz: responde "é seguro soltar bomba em 'cel'?". Além de existir rota de fuga, a rota
     não pode passar por casas onde um inimigo poderia me trancar soltando a bomba dele
     (o erro clássico: fugir para um corredor e o inimigo fechar a saída).
@@ -383,7 +383,7 @@ def _escape_tatico(mapa, cel, nivel, bombas, bloqueados, t_bomba, t_fogo, inimig
 
 def _posto(mapa, eu, bloqueados, perigo, inimigos_p, bombas, modo, t_bomba, t_fogo):
     """
-    >>> [JOÃO PEDRO]
+    >>> [JOSÉ PEDRO]
     O que faz: escolhe um bom lugar para ESPERAR (em vez de correr atrás do inimigo): longe das
     bombas, com várias saídas, fora da linha de tiro dos inimigos e (conforme o modo) a uma
     distância boa deles. Devolve a primeira ação para chegar lá, ou None para ficar parado.
@@ -444,7 +444,7 @@ def _posto(mapa, eu, bloqueados, perigo, inimigos_p, bombas, modo, t_bomba, t_fo
 def _escolher_tatico(player, mapa, players, bombas, tempo_restante, eu, nivel, t_fogo, t_bomba,
                      bloqueados, perigo, inimigos, est, self_state):
     """
-    >>> [JOÃO PEDRO] (com encaixes do CARLOS, RYAN e MAICON, marcados abaixo)
+    >>> [JOSÉ PEDRO] (com encaixes do CARLOS, RYAN e MAICON, marcados abaixo)
     O que faz: decide o que fazer quando a IA está segura. Ordem: bomba aqui -> (pressão)
     -> caçar com armadilha garantida -> power-up -> aproximar -> casa boa para bomba -> posto de espera.
     """
@@ -453,7 +453,7 @@ def _escolher_tatico(player, mapa, players, bombas, tempo_restante, eu, nivel, t
     # >>> [RYAN] também respeita a pausa entre bombas (cooldown)
     pode_bomba = (self_state["bombas_ativas"] < self_state["max_bombas"]
                   and eu not in bloqueados and _cooldown_ok(est, tempo_restante))
-    # >>> [CARLOS + JOÃO PEDRO] pressão só nos modos agressivos
+    # >>> [CARLOS + JOSÉ PEDRO] pressão só nos modos agressivos
     pressao_on = PRESSAO and modo in PRESSAO_MODOS
 
     def passo_ok(nome):
@@ -576,7 +576,7 @@ def _decidir(player, mapa, players, bombas, tempo_restante, pontos, hud_info, se
     # 1) FUGA: se a minha casa vai pegar fogo, fugir tem prioridade total
     if not _livre_apos(perigo, eu, 0.0):
         if TATICA:
-            # >>> [JOÃO PEDRO] prefere rotas cujo primeiro passo NÃO possa ser fechado por uma bomba inimiga
+            # >>> [JOSÉ PEDRO] prefere rotas cujo primeiro passo NÃO possa ser fechado por uma bomba inimiga
             ip = [p for p in players if p is not player and p.ativo]
             if ip:
                 bl2 = set(bloqueados)
@@ -605,7 +605,7 @@ def _decidir(player, mapa, players, bombas, tempo_restante, pontos, hud_info, se
                 melhor, melhor_t = nome, prox
         return melhor or "parado"
 
-    # >>> [JOÃO PEDRO] com a camada tática ligada, ela decide tudo daqui para baixo
+    # >>> [JOSÉ PEDRO] com a camada tática ligada, ela decide tudo daqui para baixo
     if TATICA:
         return _escolher_tatico(player, mapa, players, bombas, tempo_restante, eu, nivel, t_fogo, t_bomba,
                                 bloqueados, perigo, inimigos, est, self_state)
@@ -719,7 +719,7 @@ ARQ_DADOS_ANTIGO = os.path.join(_DIR, "dados_TchakaBum.npz")
 
 ACOES = ["cima", "baixo", "esquerda", "direita", "bomba"]
 
-# >>> [JOÃO PEDRO] A rede ganhou 10 entradas novas (modo, risco de emboscada, ameaça...):
+# >>> [JOSÉ PEDRO] A rede ganhou 10 entradas novas (modo, risco de emboscada, ameaça...):
 # 103 -> 113. As 5 últimas entradas continuam sendo a máscara de ações seguras.
 # >>> [NOVO] Para NÃO perder o treino já feito, redes/dados antigos de 103 entradas são
 # convertidos sozinhos (as 10 entradas novas começam em zero). Veja _migrar_pesos/_migrar_dados.
@@ -822,7 +822,7 @@ class Dados:
 
 _rede = Rede()
 _dados = Dados()
-_rede_ok = False     # >>> [JOÃO PEDRO] True só se uma rede treinada foi carregada do arquivo
+_rede_ok = False     # >>> [JOSÉ PEDRO] True só se uma rede treinada foi carregada do arquivo
 _passos = 0          # total de exemplos de treino já vistos (guardado junto com os pesos)
 _partidas = 0        # quantas execuções do jogo a rede já treinou (guardado junto com os pesos)
 _novos = 0
@@ -874,7 +874,7 @@ def _carregar(verbose=True):
                     print(f"[IA {NOME}] Arquivo de rede incompatível: {sem_rede}")
         elif verbose:
             print(f"[IA {NOME}] Nenhuma rede salva: {sem_rede}")
-        # >>> [JOÃO PEDRO] os exemplos de treino só são carregados quando vai treinar
+        # >>> [JOSÉ PEDRO] os exemplos de treino só são carregados quando vai treinar
         if TREINAR and arq_dados:
             if _dados.carregar(arq_dados) and verbose:
                 print(f"[IA {NOME}] Dados de treino carregados ({_dados.n} exemplos"
@@ -1082,7 +1082,7 @@ def _features(mapa, eu, nivel, perigo, bloqueados, inimigos, pode_bomba, util, e
     else:
         f += [0.0, 0.0]
     f += list(_distancias(mapa, eu, nivel, bloqueados, perigo, inimigos, bombas, t_bomba, t_fogo))  # 16
-    f += list(extra)             # 10 >>> [JOSÃO PEDRO]: modo, risco de emboscada, ameaça, vivos, blocos
+    f += list(extra)             # 10 >>> [JOSÉ PEDRO]: modo, risco de emboscada, ameaça, vivos, blocos
     f += [float(m) for m in mask]                                                        # 5: ações seguras (SEMPRE por último)
     return np.array(f, dtype=np.float32)
 
@@ -1125,7 +1125,7 @@ def _decidir_rede(player, mapa, players, bombas, tempo_restante, pontos, hud_inf
     bloqueados = {(b.x, b.y) for b in bombas if not b.explodida}
     perigo = _calcular_perigo(mapa, bombas, None, t_fogo)
     inimigos = {(p.grid_x, p.grid_y) for p in players if p is not player and p.ativo}
-    inimigos_p = [p for p in players if p is not player and p.ativo]    # >>> [JOSÃO PEDRO]
+    inimigos_p = [p for p in players if p is not player and p.ativo]    # >>> [JOSÉ PEDRO]
 
     # Em perigo, a camada de segurança foge sozinha (a rede não tem permissão para arriscar)
     if not _livre_apos(perigo, eu, 0.0):
@@ -1137,7 +1137,7 @@ def _decidir_rede(player, mapa, players, bombas, tempo_restante, pontos, hud_inf
     pode_bomba = (self_state["bombas_ativas"] < self_state["max_bombas"]
                   and eu not in bloqueados and _cooldown_ok(est, tempo_restante))
     util = _bomba_util(mapa, eu, nivel, inimigos)
-    if TATICA:   # >>> [JOSÃO PEDRO] a fuga da bomba também considera emboscada de inimigos
+    if TATICA:   # >>> [JOSÉ PEDRO] a fuga da bomba também considera emboscada de inimigos
         esc_ok = pode_bomba and util and _escape_tatico(mapa, eu, nivel, bombas, bloqueados, t_bomba,
                                                         t_fogo, inimigos_p)
     else:
@@ -1156,7 +1156,7 @@ def _decidir_rede(player, mapa, players, bombas, tempo_restante, pontos, hud_inf
                 max_passos=14, t0=PASSO) is not None:
             mask[i] = 1
 
-    # >>> [JOSÃO PEDRO] camada tática: tira da lista as casas onde um inimigo poderia me
+    # >>> [JOSÉ PEDRO] camada tática: tira da lista as casas onde um inimigo poderia me
     # encurralar (só se sobrar alguma outra opção segura)
     risco = [0, 0, 0, 0]
     if TATICA and inimigos_p:
@@ -1177,7 +1177,7 @@ def _decidir_rede(player, mapa, players, bombas, tempo_restante, pontos, hud_inf
     modo = _modo(mapa, players, tempo_restante)
     _modos[modo] = _modos.get(modo, 0) + 1
 
-    # >>> [JOSÃO PEDRO] sem rede treinada (e sem estar treinando), as regras decidem
+    # >>> [JOSÉ PEDRO] sem rede treinada (e sem estar treinando), as regras decidem
     if not (_rede_ok or TREINAR):
         _stats["regras"] += 1
         prof = _decidir(player, mapa, players, bombas, tempo_restante, pontos, hud_info, self_state)
